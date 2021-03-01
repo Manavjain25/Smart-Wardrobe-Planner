@@ -1,0 +1,57 @@
+/*---------------LOGIN PAGE-------------------*/
+
+#logocloset {
+	margin-top:50%; 	
+}
+
+#womanpic {
+	margin-top:10%; 
+	left:10%; 
+
+}
+#manpic {
+	margin-top:60%; 
+	left:50%; 
+	z-index:3;
+	
+}
+
+#login{
+  margin-left:65px; 
+	width: 130%;
+  margin-top: -50px;
+}
+
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  color: #ffffff;
+  background-color: #3276b1;
+  border-color: #285e8e;
+  margin-top: 60px
+}
+
+.omb_forgotPwd{
+	margin-top:5px;
+	font-size: 11px;
+	margin-left:22px;
+}
+.checkbox{
+	top:5px;
+	font-size: 11px;
+}
+
+#usernameDiv{
+	margin-bottom: 5px;
+
+}
+#passwordDiv{
+	margin-bottom: 5px;
+
+}
+.forgotpass{
+  margin-left:10px;
+  margin-bottom:10px;
+}

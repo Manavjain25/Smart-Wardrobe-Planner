@@ -1,4 +1,3 @@
-import matching_script as ms
-
-k = ms.get_matching('static\\wardrobe_users\\456@gmail.com\\T-shirts\\test4.jpg','static\\wardrobe_users\\456@gmail.com\\Pants\\test1.jpg')
-print(k)
+dict ={'1':1,'2':2}
+my_dict = enumerate(dict)
+print(my_dict)

@@ -42,6 +42,17 @@
                         <a class="dropdown-item" id="Formals" href="/occasion/Formals">Formals</a>
                     </div>
                   </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Online Recommendation
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                      <a class="dropdown-item"  href="/online/Shirt">Shirt</a>
+                        <a class="dropdown-item"  href="/online/T-shirt" >T-shirt</a>
+                        <a class="dropdown-item"  href="/online/Jeans">Jeans</a>
+                        <a class="dropdown-item"  href="/online/Shorts">Shorts</a>
+                    </div>
+                  </li>
                 </ul>
               </div>
             </nav>
@@ -171,12 +182,12 @@
     }
 
    
-        $("#T-shirts").load("templates\\your_closet.html",function(responseTxt, statusTxt, xhr){
-        if(statusTxt == "success")
-      alert("External content loaded successfully!");
-    if(statusTxt == "error")
-      alert("Error: " + xhr.status + ": " + xhr.statusText);
-      })
+    //     $("#T-shirts").load("templates\\your_closet.html",function(responseTxt, statusTxt, xhr){
+    //     if(statusTxt == "success")
+    //   alert("External content loaded successfully!");
+    // if(statusTxt == "error")
+    //   alert("Error: " + xhr.status + ": " + xhr.statusText);
+    //   })
       
     
     

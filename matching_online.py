@@ -12,21 +12,51 @@ Original file is located at
 
 import tensorflow as tf
 import cv2
+import tensorflow
 import os
 from tensorflow.keras.models import load_model
 import numpy as np
+
+import cv2
 import urllib
+import cv2
+import numpy as np
+
+
 import urllib.request as ur
+
+import tensorflow as tf
 import keras
 from keras import Model
 from keras.applications.resnet50 import ResNet50
 from keras.preprocessing import image 
 from keras.applications.resnet50 import preprocess_input, decode_predictions
 from keras.layers import GlobalMaxPooling2D
-from sklearn.metrics.pairwise import cosine_similarity
-import matplotlib.pyplot as plt
 
 embedding_model= load_model('static/embeding_model/embeding_model.h5', compile=False)
+
+# def get_embedding_url(model, url):
+#     # Reshape
+#     url_response = ur.urlopen(url)
+#     img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+#     img = cv2.imdecode(img_array, -1)
+#     # Pre process Input
+#     img=cv2.resize(img,(224,224),cv2.INTER_AREA)
+#     x   = preprocess_input(img)
+#     return model.predict(x).reshape(-1)
+
+
+def get_embedding_url(model, url):
+    # Reshape
+    url_response = ur.urlopen(url)
+    img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+    img = cv2.imdecode(img_array, -1)
+    # Pre process Input
+    img=cv2.resize(img,(224,224),cv2.INTER_AREA)
+    img=img.reshape((1,224,224,3))
+    img   = preprocess_input(img)
+    print(img.shape)
+    return model.predict(img).reshape(-1)
 
 def get_embedding(model, img):
     # Reshape
@@ -51,7 +81,7 @@ pant8_embedding=get_embedding(embedding_model,'static\Clothes Matching\lower_7.j
 pant_embeddings=[pant1_embedding,pant2_embedding,pant3_embedding,pant4_embedding,pant5_embedding,pant6_embedding,pant7_embedding,pant8_embedding]
 pant_embeddings=np.asarray(pant_embeddings)
 
-
+from sklearn.metrics.pairwise import cosine_similarity
 
 def get_closest_pant(img):
   pant_embedding=get_embedding(embedding_model,img)
@@ -60,6 +90,17 @@ def get_closest_pant(img):
   # print(similarity)
   # print(similarity[0])
   return similarity[0][0]
+
+def get_closest_pant_url(url):
+  pant_embedding=get_embedding_url(embedding_model,url)
+  similarities=cosine_similarity(np.asarray([pant_embedding]),pant_embeddings)
+  similarity=sorted(list(enumerate(similarities[0])),key=lambda x:x[1],reverse=True)
+  # print(similarity)
+  # print(similarity[0])
+  return similarity[0][0]
+
+
+
 
 pant1_model=load_model('static\Clothes Matching\pant1_model_final_v22')
 pant2_model=load_model('static\Clothes Matching\pant2_model_final_v22')
@@ -70,7 +111,7 @@ pant6_model=load_model('static\Clothes Matching\pant6_model_final_v22')
 pant7_model=load_model('static\Clothes Matching\pant7_model_final_v22')
 pant8_model=load_model('static\Clothes Matching\pant8_model_final_v22')
 
-
+import matplotlib.pyplot as plt
 
 def get_matching(upper,lower):
   pant_index=get_closest_pant(lower)
@@ -113,6 +154,103 @@ def get_matching(upper,lower):
 
   print(matching[0])
   return matching[0]
+
+def get_matching_upperurl(upper,lower):
+  pant_index=get_closest_pant(lower)
+  url_response = ur.urlopen(upper)
+  img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+  upper_img = cv2.imdecode(img_array, -1)
+  plt.imshow(upper_img)
+  # plt.imshow(img)
+  # upper_img=cv2.imread(upper)
+  # plt.show()
+  lower_img=cv2.imread(lower)
+  plt.imshow(lower_img)
+  # plt.show()
+  img=cv2.GaussianBlur(upper_img,(3,3),9)
+  img=cv2.resize(img,(224,224),cv2.INTER_AREA)
+  img=img/255
+  x=[]
+  x.append(img)
+  x=np.asarray(x)
+  if pant_index==0:
+    # print('in1')
+    matching=pant1_model.predict(x)
+  elif pant_index==1:
+    # print('in2')
+    matching=pant2_model.predict(x)
+  elif pant_index==2:
+    # print('in3')
+    matching=pant3_model.predict(x)
+  elif pant_index==3:
+    # print('in4')
+    matching=pant4_model.predict(x)
+  elif pant_index==4:
+    # print('in5')
+    matching=pant5_model.predict(x)
+  elif pant_index==5:
+    # print('in6')
+    matching=pant6_model.predict(x)
+  elif pant_index==6:
+    # print('in7')
+    matching=pant7_model.predict(x)
+  else:
+    # print('in8')
+    matching=pant8_model.predict(x)
+
+  print(matching[0])
+  return matching[0]
+
+
+def get_matching_lowerurl(upper,lower):
+  pant_index=get_closest_pant_url(lower)
+  url_response = ur.urlopen(lower)
+  img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+  lower_img = cv2.imdecode(img_array, -1)
+  plt.imshow(lower_img)
+  # plt.imshow(img)
+  # upper_img=cv2.imread(upper)
+  # plt.show()
+  upper_img=cv2.imread(upper)
+  plt.imshow(upper_img)
+  # plt.show()
+  img=cv2.GaussianBlur(upper_img,(3,3),9)
+  img=cv2.resize(img,(224,224),cv2.INTER_AREA)
+  img=img/255
+  x=[]
+  x.append(img)
+  x=np.asarray(x)
+  if pant_index==0:
+    # print('in1')
+    matching=pant1_model.predict(x)
+  elif pant_index==1:
+    # print('in2')
+    matching=pant2_model.predict(x)
+  elif pant_index==2:
+    # print('in3')
+    matching=pant3_model.predict(x)
+  elif pant_index==3:
+    # print('in4')
+    matching=pant4_model.predict(x)
+  elif pant_index==4:
+    # print('in5')
+    matching=pant5_model.predict(x)
+  elif pant_index==5:
+    # print('in6')
+    matching=pant6_model.predict(x)
+  elif pant_index==6:
+    # print('in7')
+    matching=pant7_model.predict(x)
+  else:
+    # print('in8')
+    matching=pant8_model.predict(x)
+
+  print(matching[0])
+  return matching[0]
+
+
+
+
 
 
 

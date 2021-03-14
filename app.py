@@ -3,17 +3,15 @@ import random
 from cv2 import cv2
 import  pandas as pd
 import numpy as np 
-# import tensorflow as tf
 import tensorflow as tf
-# from keras.preprocessing.image import load_img
-# from keras.preprocessing.image import img_to_array
-# from keras.models import load_model
 from tensorflow.keras.models import load_model
 import mysql.connector
 import os,shutil
 from PIL import Image 
 import matching_script as ms
+import matching_online as mn
 import occasion as oc
+import online as on
 
 
 app=Flask(__name__)
@@ -328,9 +326,79 @@ def add_user():
     return redirect('/your_closet')
 
 
+@app.route('/online/<typ>',methods=['GET','POST'])
+def online(typ):
+    print(typ)
+    res = on.data(typ,5)
+    print(res)
+    matched_dict={}
+    matched_dict_len={}
+    product = typ
+
+    Shorts=os.listdir('static/wardrobe_users/{}/Shorts'.format(session['user_id']))
+    Pants=os.listdir('static/wardrobe_users/{}/Pants'.format(session['user_id']))
+    Tshirts=os.listdir('static/wardrobe_users/{}/T-shirts'.format(session['user_id']))
+    Shirts=os.listdir('static/wardrobe_users/{}/Shirts'.format(session['user_id']))
+    
+    res= res[0:5]
+    
+    if product == "Shirt" or product== "T-shirt":
+        for f in res:
+            dummy = []
+            for i in Shorts:
+                k = mn.get_matching_upperurl(f,'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i)
+                if k and k[0] > 0.5:
+                    m = 'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i
+                # matched_dict[m] = round(k[0]*100,2)
+                    dummy.append(m)
+            matched_dict[f]=dummy
+            matched_dict_len[f]=len(dummy)
+
+        for f in res:
+            dummy1=[]
+            for j in Pants:
+                k =  mn.get_matching_upperurl(f,'static/wardrobe_users/'+session['user_id'] + '/Pants/'+j)
+                if k and k[0] > 0.5:
+                    m= 'static/wardrobe_users/'+session['user_id'] + '/Pants/'+j
+                    # matched_dict[m]= round(k[0]*100,2)
+                    dummy1.append(m)
+            matched_dict[f]=dummy1
+            matched_dict_len[f]=len(dummy1)
+
+    elif product=="Jeans" or product== "Shorts":
+
+        for f in res:
+            dummy = []
+            for i in Tshirts:
+                k = mn.get_matching_lowerurl('static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i,f)
+                if k and k[0] > 0.5:
+                    m= 'static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i
+                # matched_dict[m]= round(k[0]*100,2)
+                    dummy.append(m)
+            matched_dict[f]=dummy
+            matched_dict_len[f]=len(dummy)
+
+        for f in res:
+            dummy1= []
+            for j in Shirts:
+                k = mn.get_matching_lowerurl('static/wardrobe_users/'+session['user_id'] + '/Shirts/'+j,f)
+                if k and  k[0] > 0.5:
+                    m= 'static/wardrobe_users/'+session['user_id'] + '/Shirts/'+j
+                # matched_dict[m] =round(k[0]*100,2)
+                    dummy1.append(m)
+            matched_dict[f]=dummy1
+            matched_dict_len[f]=len(dummy1)
+
+        
+    print(matched_dict)
+    print(matched_dict_len)
+    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =matched_dict_len)
+#    / return redirect('/your_closet')
 
 
-@app.route('/delete' , methods=['POST'])
+
+
+@app.route('/delete', methods=['POST'])
 def delete():
     if request.method=='POST':
         print("in")

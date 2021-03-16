@@ -392,9 +392,16 @@ def online(typ):
         
     print(matched_dict)
     print(matched_dict_len)
-    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =matched_dict_len)
-#    / return redirect('/your_closet')
+    # This approach is giving error in runtime
+    # for k,v in matched_dict_len.items():
+    #     if v == 0:
+    #         del matched_dict_len[k]
 
+    m = { k:v for k, v in matched_dict_len.items() if v } #Dict Comprehension
+
+    d = dict(sorted(m.items(), key=lambda x: x[1], reverse=True))
+    print(d)
+    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =d)
 
 
 
@@ -407,19 +414,7 @@ def delete():
         print(m)
         os.remove(m)
 
-
-    Tshirts=os.listdir('static/wardrobe_users/{}/T-shirts'.format(session['user_id']))
-    Shirts=os.listdir('static/wardrobe_users/{}/Shirts'.format(session['user_id']))
-    Shorts=os.listdir('static/wardrobe_users/{}/Shorts'.format(session['user_id']))
-    Pants=os.listdir('static/wardrobe_users/{}/Pants'.format(session['user_id']))
-    Jackets=os.listdir('static/wardrobe_users/{}/Jackets'.format(session['user_id']))
-    user=session['user_id']
-    
-    print(Tshirts)
-    
-    return render_template('your_closet.html', Tshirts=Tshirts, Shirts=Shirts, Shorts=Shorts, Pants=Pants, Jackets=Jackets, user=user)
-    
-    # return redirect('/your_closet')
+    return redirect('/your_closet')
 
 @app.route('/logout')
 def logout():

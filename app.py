@@ -33,15 +33,6 @@ def classfiy_image(img):
     prediction=classification_loaded_model.predict_classes(x,True,None)
     return prediction[0]
 
-# app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
-# ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg']
-# def allowed_file(filename):
-#     return '.' in filename and \
-#         filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
-
-# def init():
-#     global graph
-    # graph = tf.get_default_graph()
 
 @app.route('/')
 def login_SignUp():
@@ -55,10 +46,7 @@ def home():
 
 @app.route('/occasion/<typ>', methods=['GET','POST'])
 def occasion(typ):
-    print(typ)
-   
-    # print(request.form.get("occasion"))
-       
+    
     Tshirts=os.listdir('static/wardrobe_users/{}/T-shirts'.format(session['user_id']))
     Shirts=os.listdir('static/wardrobe_users/{}/Shirts'.format(session['user_id']))
     Shorts=os.listdir('static/wardrobe_users/{}/Shorts'.format(session['user_id']))
@@ -70,10 +58,10 @@ def occasion(typ):
     Casuals_lower=[]
     Formals_upper=[]
     Formals_lower=[]
+    Ethnic={}
+    Casuals={}
+    Formals={}
 
-    
-     
-      
     for i in Tshirts:
         m = oc.kunal('static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i)
         if m =="ethnic":
@@ -118,43 +106,39 @@ def occasion(typ):
         else:
             pass
     
-    Ethnic_matched=[ [] for i in range(0,len(Ethnic_upper))]
-    m=0
-    for i in Ethnic_upper:
-        for j in Ethnic_lower:
-            k = ms.get_matching(i,j)
-            if k and k[0] > 0.5:
-                Ethnic_matched[m].append(j)
-        m+=1
-
-    Casuals_matched=[[] for i in range(0,len(Casuals_upper))]
-    m=0
-    for i in Casuals_upper:
-        for j in Casuals_lower:
-            k = ms.get_matching(i,j)
-            if k and k[0] > 0.5:
-                Casuals_matched[m].append(j)
-        m+=1
-
-    Formals_matched=[[] for i in range(0,len(Formals_upper))]
-    m=0
-    for i in Formals_upper:
-        for j in Formals_lower:
-            k = ms.get_matching(i,j)
-            if k and k[0] > 0.5:
-                Formals_matched[m].append(j)
-        m+=1 
-    
-    Ethnic = Ethnic_upper + Ethnic_lower
-    Casuals = Casuals_upper + Casuals_lower
-    Formals = Formals_upper + Formals_lower
-   
     if typ == "Ethnic":
-        return render_template('occasion.html' ,Final_array =Ethnic_matched , Upper = Ethnic_upper , length=len(Ethnic_upper) , Clothes = Ethnic , typ =typ)
+        for i in Ethnic_upper:
+            dummy={}
+            for j in Ethnic_lower:
+                k = ms.get_matching(i,j)
+                if k and k[0] > 0.5:
+                    dummy[j]=round(k[0]*100,2)
+            Ethnic[i]=dummy
+
+        Ethnic_list = Ethnic_upper + Ethnic_lower
+        return render_template('occasion.html'  , Clothes = Ethnic_list , typ =typ, matched_dict =Ethnic)
+    
     elif typ == "Casuals":
-        return render_template('occasion.html' ,Final_array =Casuals_matched ,Upper = Casuals_upper , length = len(Casuals_upper) , Clothes = Casuals , typ = typ )
+        for i in Casuals_upper:
+            dummy={}
+            for j in Casuals_lower:
+                k = ms.get_matching(i,j)
+                if k and k[0] > 0.5:
+                    dummy[j]=round(k[0]*100,2)
+            Casuals[i]=dummy
+        Casuals_list = Casuals_upper + Casuals_lower
+        return render_template('occasion.html'  , Clothes = Casuals_list , typ = typ, matched_dict=Casuals )
+    
     elif typ == "Formals":
-        return  render_template('occasion.html' ,Final_array =Formals_matched ,Upper= Formals_upper , length = len(Formals_upper), Clothes = Formals , typ =typ )
+        for i in Formals_upper:
+            dummy={}
+            for j in Formals_lower:
+                k = ms.get_matching(i,j)
+                if k and k[0] > 0.5:
+                    dummy[j]=round(k[0]*100,2)
+            Formals[i] = dummy
+        Formals_list = Formals_upper + Formals_lower
+        return  render_template('occasion.html' ,  Clothes = Formals_list , typ =typ ,matched_dict = Formals)
 
 
     
@@ -268,14 +252,7 @@ def your_closet():
         shutil.move(n, m)
         # image.save(m)  
 
-        # print(image)
-        # file_path=os.path.join('static\wardrobe_users\{}\{}'.format(session['user_id'],product),image.filename)
-        # print(file_path)
-        # m= 'static\\wardrobe_users\\'+image.filename
-        # image.save(n)
-        # print(file_path)
-        # os.remove(file_saved)
-        # image.save(ENTER FILE WHERE YOU WANT TO SAVE IMAGE)
+       
 
     Tshirts=os.listdir('static/wardrobe_users/{}/T-shirts'.format(session['user_id']))
     Shirts=os.listdir('static/wardrobe_users/{}/Shirts'.format(session['user_id']))

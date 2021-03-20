@@ -14,29 +14,29 @@
   </div>
   {% endfor %}
 </div>
+
 <hr style="width: 100%; text-align: left; margin-left: 0" />
 <h2>Matching Combinations</h2>
 <hr style="width: 100%; text-align: left; margin-left: 0" />
 
 <div class="row">
-  {% for i in range(0,length) %}
+  {% for j,v in matched_dict.items() %}
   <div class="col-sm-3">
     <div class="card" style="margin-top: 20px">
       <div class="card-body">
-        <img src="/{{Upper[i]}}" alt="ok" class="image" />
+        <img src="/{{j}}" alt="ok" class="image" />
       </div>
     </div>
     <hr />
   </div>
-
   <div class="col-sm-9">
     <div class="row">
-      {% for j in Final_array[i] %}
-      <!-- {% print (i)%} -->
+      {% for m in v %}
       <div class="col-md-3 col-sm-6">
         <div class="card" class="image" style="margin-top: 20px">
           <div class="card-body">
-            <img src="/{{j}}" alt="ok" class="image" />
+            <p class="card-text">{{v[m]}}%</p>
+            <img src="/{{m}}" alt="ok" class="image" />
           </div>
         </div>
       </div>

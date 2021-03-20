@@ -1,9 +1,39 @@
 .image {
-    max-width: 50%;
-    max-height: 60%;
-    border-radius: 5px;
-    margin: 0 25% 0 25% 
+  max-width: 50%;
+  max-height: 60%;
+  border-radius: 5px;
+  margin: 0 25% 0 25%;
 }
-.upper{
-    margin-top: 20px;
+.upper {
+  margin-top: 20px;
+}
+
+.close-button p {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: 100%;
+  color: inherit;
+  font-size: 30px;
+  display: none;
+}
+
+/* .close-button:hover img + p {
+  display: block;
+} */
+
+.close-button:hover::after {
+  content: "";
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: 100%;
+  background: url("/static/image/delete-icon.jpg") center no-repeat;
+  background-size: 80px;
+}
+
+.close-button:hover img {
+  opacity: 0.4;
 }

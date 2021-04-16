@@ -12,7 +12,9 @@ import matching_script as ms
 import matching_online as mn
 import occasion as oc
 import online as on
-
+import fil as fl
+from sklearn.metrics.pairwise import cosine_similarity
+import statistics
 
 app=Flask(__name__)
 app.secret_key=os.urandom(24)
@@ -374,13 +376,197 @@ def online(typ):
     #     if v == 0:
     #         del matched_dict_len[k]
 
+        
+
     m = { k:v for k, v in matched_dict_len.items() if v } #Dict Comprehension
+    embedding_model= load_model('static/embeding_model/embeding_model.h5', compile=False)
+    wardrobe_list=[]
+        
+    if product=="Shirt":
+        for i in Shirts:
+            wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Shirts/'+i))
+    elif product=="T-shirt":
+        for i in Tshirts:
+            wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i))
+    elif product=="Jeans":
+        for i in Pants:
+            wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Pants/'+i))
+    else:
+        for i in Shorts:
+            wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i))
+    
+    print("wardobe shape",np.asarray(wardrobe_list).shape)
+    
+    matched_dict_similar={}
+    for cloth in m.keys():
+        cloth_embedding=mn.get_embedding_url(embedding_model,cloth)
+        print(cloth_embedding,"shape",cloth_embedding.shape)
+        print(wardrobe_list)
+        similarities=cosine_similarity(np.asarray([cloth_embedding]),np.asarray(wardrobe_list))
+        print("sim",similarities)
+        print("sim1",similarities[0])
+        x=statistics.mean(similarities[0])
+        matched_dict_similar[cloth]=x
 
-    d = dict(sorted(m.items(), key=lambda x: x[1], reverse=True))
-    print(d)
-    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =d)
+        print("----------matched_dict_len_embedding--------------")
+        print(matched_dict_similar)
 
 
+    d = dict(sorted(matched_dict_similar.items(), key=lambda x: x[1], reverse=True))
+    # new_dict1 = {k:v for k, v in m.items() if k in d.keys()}
+    # print("Manav")
+    # print(new_dict1)
+    new_dict={}
+    # for i in d.keys():
+    #     new_dict[i]=m[i]
+    
+    for i,v in d.items():
+        new_dict[i] = [m[i],round(v*100,2)]
+
+    # print("Atharva")
+    print(new_dict)
+    filters={"Shirt":{"brands":["Scott International","Allen Solly","AWG ALL WEATHER GEAR","Van Heusen","EYEBOGLER"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}
+    ,"T-shirt":{"brands":["Allen Solly","Louis Philippe","Arrow","Van Heusen","Peter England"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}
+    ,"Jeans":{"brands":["Levi's","Pepe Jeans","Spykar","Tommy Hilfiger","KILLER"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]},
+    "Shorts":{"brands":["Reebok","Jockey","SHIV NARESH","Veirdo","Adidas"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}}
+
+    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =new_dict,fil = filters[product],product =product)
+
+@app.route('/filter',methods=['GET','POST'])
+def fil():
+    if request.method == "POST":
+        brand1 = request.form.get('brand')
+        size = request.form.get('size')
+        colour = request.form.get('colour')
+        material = request.form.get('material')
+        cloth = request.form.get('cloth')
+        brand=""
+        for i in brand1:
+            if i==" ":
+                brand+='+'
+            else:
+                brand+=i
+    
+        # print("{},{},{},{},{}".format(brand,size,colour,material,cloth))
+
+        res =  fl.data(cloth,brand,size,colour,material)
+        # print(res)
+
+        matched_dict={}
+        matched_dict_len={}
+        product = cloth
+
+        Shorts=os.listdir('static/wardrobe_users/{}/Shorts'.format(session['user_id']))
+        Pants=os.listdir('static/wardrobe_users/{}/Pants'.format(session['user_id']))
+        Tshirts=os.listdir('static/wardrobe_users/{}/T-shirts'.format(session['user_id']))
+        Shirts=os.listdir('static/wardrobe_users/{}/Shirts'.format(session['user_id']))
+        
+        res= res[0:5]
+        
+        if product == "Shirt" or product== "T-shirt":
+            for f in res:
+                dummy = []
+                for i in Shorts:
+                    k = mn.get_matching_upperurl(f,'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i)
+                    if k and k[0] > 0.5:
+                        m = 'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i
+                    # matched_dict[m] = round(k[0]*100,2)
+                        dummy.append(m)
+                matched_dict[f]=dummy
+                matched_dict_len[f]=len(dummy)
+
+            for f in res:
+                dummy1=[]
+                for j in Pants:
+                    k =  mn.get_matching_upperurl(f,'static/wardrobe_users/'+session['user_id'] + '/Pants/'+j)
+                    if k and k[0] > 0.5:
+                        m= 'static/wardrobe_users/'+session['user_id'] + '/Pants/'+j
+                        # matched_dict[m]= round(k[0]*100,2)
+                        dummy1.append(m)
+                matched_dict[f]=dummy1
+                matched_dict_len[f]=len(dummy1)
+
+        elif product=="Jeans" or product== "Shorts":
+
+            for f in res:
+                dummy = []
+                for i in Tshirts:
+                    k = mn.get_matching_lowerurl('static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i,f)
+                    if k and k[0] > 0.5:
+                        m= 'static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i
+                    # matched_dict[m]= round(k[0]*100,2)
+                        dummy.append(m)
+                matched_dict[f]=dummy
+                matched_dict_len[f]=len(dummy)
+            
+            for f in res:
+                dummy1= []
+                for j in Shirts:
+                    k = mn.get_matching_lowerurl('static/wardrobe_users/'+session['user_id'] + '/Shirts/'+j,f)
+                    if k and  k[0] > 0.5:
+                        m= 'static/wardrobe_users/'+session['user_id'] + '/Shirts/'+j
+                    # matched_dict[m] =round(k[0]*100,2)
+                        dummy1.append(m)
+                matched_dict[f]=dummy1
+                matched_dict_len[f]=len(dummy1)
+
+        print("-----Matched_dict-------")    
+        print(matched_dict)
+
+        print("------------Matched_dict_len-------")
+        print(matched_dict_len)
+        embedding_model= load_model('static/embeding_model/embeding_model.h5', compile=False)
+        wardrobe_list=[]
+        
+        if product=="Shirt":
+            for i in Shirts:
+                wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Shirts/'+i))
+        elif product=="T-shirt":
+            for i in Tshirts:
+                wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/T-shirts/'+i))
+        elif product=="Jeans":
+            for i in Pants:
+                wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Pants/'+i))
+        else:
+            for i in Shorts:
+                wardrobe_list.append(ms.get_embedding(embedding_model,'static/wardrobe_users/'+session['user_id'] + '/Shorts/'+i))
+        print("wardobe shape",np.asarray(wardrobe_list).shape)
+        
+            
+        # This approach is giving error in runtime
+        # for k,v in matched_dict_len.items():
+        #     if v == 0:
+        #         del matched_dict_len[k]
+
+        m = { k:v for k, v in matched_dict_len.items() if v } #Dict Comprehension
+
+        matched_dict_similar={}
+        for cloth in m.keys():
+            cloth_embedding=mn.get_embedding_url(embedding_model,cloth)
+            print(cloth_embedding,"shape",cloth_embedding.shape)
+            print(wardrobe_list)
+            similarities=cosine_similarity(np.asarray([cloth_embedding]),np.asarray(wardrobe_list))
+            print("sim",similarities)
+            print("sim1",similarities[0])
+            x=statistics.mean(similarities[0])
+            matched_dict_similar[cloth]=x
+
+        print("----------matched_dict_len_embedding--------------")
+        print(matched_dict_similar)
+
+        d = dict(sorted(matched_dict_similar.items(), key=lambda x: x[1], reverse=True))
+        # print(d)
+        new_dict={}
+        for i,v in d.items():
+            new_dict[i] = [m[i],round(v*100,2)]
+
+        filters={"Shirt":{"brands":["Scott International","Allen Solly","AWG ALL WEATHER GEAR","Van Heusen","EYEBOGLER"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}
+        ,"T-shirt":{"brands":["Allen Solly","Louis Philippe","Arrow","Van Heusen","Peter England"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}
+        ,"Jeans":{"brands":["Levi's","Pepe Jeans","Spykar","Tommy Hilfiger","KILLER"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]},
+        "Shorts":{"brands":["Reebok","Jockey","SHIV NARESH","Veirdo","Adidas"],"sizes":["S","M","L","XL"],"colours":["Black","Brown","Red","Green","Blue"],"materal":["Cotton","Denim","Linen","Rayon","Synthetic"]}}
+    
+    return render_template('online.html',matched_dict = matched_dict , matched_dict_len =new_dict,fil = filters[product],product =product)
+    # return redirect('/your_closet')
 
 @app.route('/delete', methods=['POST'])
 def delete():

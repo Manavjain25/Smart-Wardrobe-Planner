@@ -59,7 +59,49 @@
             </nav>
             <a class="btn btn-outline-primary" href="/logout">Logout</a>
         </div>
-
+        <div class="jumbotron jumbotron-fluid">
+          <div class="container">
+            <h1 class="display-4">Select Filters</h1>
+            <form method="POST" action="/filter" class="form" enctype="multipart/form-data">
+              <div class="row">
+                <div class="col-sm-3">
+                  <select class="form-select" aria-label="Default select example" name="brand">
+                    <option selected disabled>Brands</option>
+                    {% for i in fil["brands"] %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <div class="col-sm-3">
+                  <select class="form-select" aria-label="Default select example" name="size">
+                    <option selected disabled>Sizes</option>
+                     {% for i in fil["sizes"] %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <div class="col-sm-3">
+                  <select class="form-select" aria-label="Default select example" name="colour">
+                    <option selected disabled>Colors</option>
+                    {% for i in fil["colours"] %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <div class="col-sm-3">
+                  <select class="form-select" aria-label="Default select example" name="material">
+                    <option selected disabled>Material</option>
+                    {% for i in fil["materal"] %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %} 
+                  </select>
+                </div>
+                <input type="hidden" value={{product}} name="cloth">
+                <input type="submit"  class="btn btn-success" value="Filter" >
+              </div>
+            </form>
+          </div>
+        </div>
         <!-- <h1 style="text-align: center">YOUR CLOSET</h1> -->
         <hr style="width:100%;text-align:left;margin-left:0">
         <h2>Matching Clothes in Your Closet</h2>
@@ -69,14 +111,16 @@
           {% for k in matched_dict_len %}
             <!-- {% print (i)%} -->
             <div class="col-md-3 col-sm-6">
-                <div class="card">
+                <div class="card" style="max-height:100%;min-height:100%">
                     <div class="card-body" >
                       <!-- <h5 class="card-title">Card title</h5> -->
                       <!-- <p class="card-text">{{matched_dict[k]}}%</p> -->
                       <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
-                      <img src="{{k}}"  alt="ok" class="image">
+                      <img src="{{k}}"  alt="ok" class="image" style="max-height:90%;min-height:90%">
                       <a  href="#" data-toggle="modal"  data-target="#{{count.value}}" data-image-id="{{k}}">
-                      <h5 class="card-title">Matches well with:<br>{{matched_dict_len[k]}} Clothes</h5>
+                      <h5 class="card-title">Matches well with:<br>{{matched_dict_len[k][0]}} Clothes</h5>
+                      <h5 class="card-title">Similarity to your Wardrobe:<br>{{matched_dict_len[k][1]}}%</h5>
+                      
                       <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="{{k}}">
                         Launch demo modal
                       </button> -->
@@ -96,19 +140,19 @@
                                <h2 class="text-center text-uppercase text-secondary mb-0">Matches with </h2> 
                             </div>
                               <div class="row">
-                                  <div class="col-lg-2 ">
-                                      <hr class="star-dark mb-5"><img class="mb-5 cloth image" src="{{k}}">
+                                  <div class="col-lg-3 ">
+                                      <hr class="star-dark mb-5"><img class="mb-5 " src="{{k}}">
                                   </div>
-                                  <div class="col-lg-4 ">
+                                  <div class="col-lg-3 ">
                                       {% for i in matched_dict[k] %}
-                                      <hr class="star-dark mb-5"><img class="mb-5 image" src="/{{i}}">
+                                      <hr class="star-dark mb-5"><img class="mb-5 " src="/{{i}}" >
                                       {% endfor %}
                                       <!-- <p class="mb-5">Hello.</p> -->
                                   </div>
                               </div>
                           </div>
                       </div>
-                      <div class="modal-footer pb-5"><a class="btn btn-primary btn-lg mx-auto rounded-pill portfolio-modal-dismiss" role="button" href="https://github.com/SmartPracticeschool/llSPS-INT-273-Intelligent-Customer-Help-Desk-with-Smart-Document-Understanding/blob/master/llSPS_INT_273_Intelligent%20Customer%20Help%20Desk%20with%20Smart%20Document%20Understanding%20(1).pdf"><i class="fa fa-search"></i>&nbsp;Buy Link</a></div>
+                      <div class="modal-footer pb-5"><a class="btn btn-primary btn-lg mx-auto rounded-pill portfolio-modal-dismiss" role="button" href="https://www.amazon.in/s?i=apparel&rh=n%3A1968093031&fs=true&qid=1614256036&ref=sr_pg_1"><i class="fa fa-search"></i>&nbsp;Buy Link</a></div>
                   </div>
               </div>
           </div>

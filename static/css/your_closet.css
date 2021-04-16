@@ -1,13 +1,15 @@
 .image {
-  max-width: 50%;
-  max-height: 60%;
+  width: 50%;
+  height: 60%;
   border-radius: 5px;
   margin: 0 25% 0 25%;
 }
 .upper {
   margin-top: 20px;
 }
-
+.cardheight {
+  height: 60%;
+}
 .close-button p {
   position: absolute;
   left: 0px;
